@@ -53,10 +53,8 @@ export default function TryoutPage() {
     setAnswers(prev => {
       const current = prev[questionId] || []
       if (questionType === 'single') {
-        // Single: replace dengan optionId
         return { ...prev, [questionId]: [optionId] }
       } else {
-        // Multiple: toggle
         const exists = current.includes(optionId)
         if (exists) {
           const filtered = current.filter(id => id !== optionId)
@@ -82,7 +80,8 @@ export default function TryoutPage() {
     for (const q of questions) {
       const selectedIds = answers[q.id] || []
       const correctOptions = q.question_options.filter((opt: any) => opt.is_correct).map((opt: any) => opt.id)
-      const isCorrect = selectedIds.length === correctOptions.length && correctOptions.every(id => selectedIds.includes(id))
+      // Perbaikan: tambahkan tipe string pada parameter id
+      const isCorrect = selectedIds.length === correctOptions.length && correctOptions.every((id: string) => selectedIds.includes(id))
       if (isCorrect) correct++
     }
 
@@ -147,7 +146,6 @@ export default function TryoutPage() {
     </div>
   )
 
-  // Start screen (sama seperti sebelumnya)
   if (!started) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
       <div style={{ background: 'white', borderRadius: '20px', padding: '48px', maxWidth: '480px', width: '100%', textAlign: 'center', border: '1px solid #e2e8f0', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
@@ -179,7 +177,6 @@ export default function TryoutPage() {
     </div>
   )
 
-  // Result screen (sama seperti sebelumnya, dengan tambahan tombol leaderboard dan pembahasan)
   if (finished && result) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
       <div style={{ background: 'white', borderRadius: '20px', padding: '48px', maxWidth: '480px', width: '100%', textAlign: 'center', border: '1px solid #e2e8f0', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
@@ -202,13 +199,11 @@ export default function TryoutPage() {
     </div>
   )
 
-  // Exam screen
   const currentQ = questions[currentIdx]
   const answeredCount = Object.keys(answers).length
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
-      {/* Top bar */}
       <div style={{ background: 'white', borderBottom: '1px solid #e2e8f0', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10 }}>
         <div><p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>{exam?.categories?.name}</p><h2 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#1e293b' }}>{exam?.title}</h2></div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -219,7 +214,6 @@ export default function TryoutPage() {
       </div>
 
       <div style={{ display: 'flex', flex: 1, maxWidth: '1100px', margin: '0 auto', width: '100%', padding: '24px', gap: '24px' }}>
-        {/* Question area */}
         <div style={{ flex: 1 }}>
           <div style={{ background: 'white', borderRadius: '16px', padding: '28px', border: '1px solid #e2e8f0', marginBottom: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
@@ -231,7 +225,6 @@ export default function TryoutPage() {
             {currentQ?.question_type === 'multiple' && <div style={{ marginTop: '12px', fontSize: '12px', color: '#64748b', background: '#f1f5f9', padding: '4px 8px', borderRadius: '20px', display: 'inline-block' }}>✓ Bisa memilih lebih dari satu</div>}
           </div>
 
-          {/* Options */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {currentQ?.question_options?.map((opt: any, idx: number) => {
               const selected = answers[currentQ.id]?.includes(opt.id) || false
@@ -272,7 +265,6 @@ export default function TryoutPage() {
           </div>
         </div>
 
-        {/* Navigator */}
         <div style={{ width: '220px', flexShrink: 0 }}>
           <div style={{ background: 'white', borderRadius: '16px', padding: '20px', border: '1px solid #e2e8f0', position: 'sticky', top: '80px' }}>
             <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b', marginTop: 0, marginBottom: '16px' }}>Navigasi Soal</h3>

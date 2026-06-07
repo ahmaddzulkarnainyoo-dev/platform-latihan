@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -12,7 +12,8 @@ interface Option {
   isCorrect: boolean
 }
 
-export default function TambahSoal() {
+// Komponen internal yang menggunakan useSearchParams
+function TambahSoalContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
@@ -73,14 +74,11 @@ export default function TambahSoal() {
     setOptions(prev => prev.map(opt => {
       if (opt.id !== optId) return opt
       if (questionType === 'single') {
-        // Single choice: hanya satu yang benar
         return { ...opt, isCorrect: true }
       } else {
-        // Multiple choice: toggle
         return { ...opt, isCorrect: !opt.isCorrect }
       }
     }))
-    // Jika single choice, set yang lain ke false
     if (questionType === 'single') {
       setOptions(prev => prev.map(opt => ({
         ...opt,
@@ -308,5 +306,14 @@ export default function TambahSoal() {
         </div>
       </div>
     </div>
+  )
+}
+
+// Halaman utama yang membungkus dengan Suspense
+export default function TambahSoalPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Memuat halaman...</div>}>
+      <TambahSoalContent />
+    </Suspense>
   )
 }

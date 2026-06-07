@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function DaftarSoal() {
+// Komponen internal yang berisi logika utama
+function DaftarSoalContent() {
   const supabase = createClient()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -19,12 +20,10 @@ export default function DaftarSoal() {
   const [totalCount, setTotalCount] = useState(0)
   const pageSize = 10
 
-  // Load daftar ujian untuk dropdown
   useEffect(() => {
     loadExams()
   }, [])
 
-  // Load soal ketika selectedExamId atau page berubah
   useEffect(() => {
     if (selectedExamId) {
       loadQuestions()
@@ -47,7 +46,6 @@ export default function DaftarSoal() {
     if (!selectedExamId) return
     setLoading(true)
 
-    // Hitung total
     const { count } = await supabase
       .from('questions')
       .select('*', { count: 'exact', head: true })
@@ -55,7 +53,6 @@ export default function DaftarSoal() {
 
     setTotalCount(count || 0)
 
-    // Ambil data soal dengan opsi (untuk hitung jumlah pilihan)
     const { data } = await supabase
       .from('questions')
       .select(`
@@ -88,7 +85,7 @@ export default function DaftarSoal() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f8fafc' }}>
-      {/* Sidebar (sama seperti di halaman lain) */}
+      {/* Sidebar (salin dari kode lama) */}
       <div style={{ width: '240px', background: 'white', borderRight: '1px solid #e2e8f0', padding: '24px 0', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
         <div style={{ padding: '0 24px 24px', borderBottom: '1px solid #e2e8f0' }}>
           <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#1e293b', margin: 0 }}>Platform Latihan</h2>
@@ -237,5 +234,14 @@ export default function DaftarSoal() {
         )}
       </div>
     </div>
+  )
+}
+
+// Halaman utama dengan Suspense boundary
+export default function DaftarSoalPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Memuat...</div>}>
+      <DaftarSoalContent />
+    </Suspense>
   )
 }
