@@ -171,11 +171,11 @@ export default function DaftarKategori() {
         <div style={{ background: 'white', borderRadius: '16px', padding: '20px 24px', border: '1px solid #e2e8f0', marginBottom: '24px', display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'flex-end' }}>
           <div style={{ flex: '1 1 200px' }}>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '4px' }}>Nama Kategori</label>
-            <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Contoh: CPNS 2025" style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
+            <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Contoh: CPNS 2025" style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', color: '#1e293b' }} />
           </div>
           <div style={{ flex: '1 1 200px' }}>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '4px' }}>Slug (URL)</label>
-            <input type="text" value={newSlug} onChange={(e) => setNewSlug(e.target.value)} placeholder="contoh: cpns-2025" style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
+            <input type="text" value={newSlug} onChange={(e) => setNewSlug(e.target.value)} placeholder="contoh: cpns-2025" style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', color: '#1e293b' }} />
           </div>
           <button onClick={handleAdd} disabled={isSubmitting} style={{ padding: '8px 20px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 600, cursor: isSubmitting ? 'not-allowed' : 'pointer', height: '40px', whiteSpace: 'nowrap' }}>
             + Tambah
@@ -200,10 +200,10 @@ export default function DaftarKategori() {
                     <>
                       <div style={{ flex: 1, display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                         <div style={{ flex: '1 1 150px' }}>
-                          <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
+                          <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px', color: '#1e293b' }} />
                         </div>
                         <div style={{ flex: '1 1 150px' }}>
-                          <input type="text" value={editSlug} onChange={(e) => setEditSlug(e.target.value)} style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
+                          <input type="text" value={editSlug} onChange={(e) => setEditSlug(e.target.value)} style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px', color: '#1e293b' }} />
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '8px' }}>
