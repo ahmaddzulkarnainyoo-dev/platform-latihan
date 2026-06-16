@@ -23,7 +23,7 @@ interface SoalFormProps {
     explanation: string | null
     options: Option[]
   }
-  examId?: string // untuk mode tambah (dari query param)
+  examId?: string
 }
 
 export default function SoalForm({ mode, initialData, examId: initialExamId }: SoalFormProps) {
@@ -60,7 +60,6 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
     loadExams()
   }, [])
 
-  // Untuk mode edit: sync option imageUrl dari initialData
   useEffect(() => {
     if (initialData?.options) {
       setOptions(initialData.options)
@@ -165,11 +164,9 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
         questionImageUrl = await uploadImage(questionImageFile, path)
       }
 
-      // UPDATE atau INSERT
       let questionId = initialData?.id || ''
 
       if (mode === 'edit' && initialData?.id) {
-        // Update soal
         const { error: qError } = await supabase
           .from('questions')
           .update({
@@ -184,14 +181,12 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
         if (qError) throw qError
         questionId = initialData.id
 
-        // Hapus option lama
         const { error: delError } = await supabase
           .from('question_options')
           .delete()
           .eq('question_id', initialData.id)
         if (delError) throw delError
       } else {
-        // Insert soal baru
         const { data: question, error: qError } = await supabase
           .from('questions')
           .insert({
@@ -210,7 +205,6 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
         questionId = question.id
       }
 
-      // Insert options baru
       for (const opt of options) {
         if (!opt.text.trim() && !opt.imageFile && !opt.imageUrl) continue
 
@@ -234,7 +228,6 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
         mode === 'edit' ? '✅ Soal berhasil diperbarui!' : '✅ Soal berhasil disimpan!'
       )
 
-      // Reset form jika tambah
       if (mode === 'tambah') {
         setQuestionText('')
         setQuestionType('single')
@@ -249,7 +242,6 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
         ])
       }
 
-      // Redirect ke daftar soal setelah 2 detik
       setTimeout(() => {
         router.push('/admin/soal')
       }, 2000)
@@ -264,7 +256,6 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
 
   return (
     <div style={{ maxWidth: '800px' }}>
-      {/* Header */}
       <div
         style={{
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -279,9 +270,7 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
           {mode === 'edit' ? '✏️ Edit Soal' : '➕ Tambah Soal Baru'}
         </h1>
         <p style={{ opacity: 0.9, margin: '6px 0 0', fontSize: '14px' }}>
-          {mode === 'edit'
-            ? 'Perbaiki soal yang sudah ada'
-            : 'Buat soal baru untuk ujian pilihan'}
+          {mode === 'edit' ? 'Perbaiki soal yang sudah ada' : 'Buat soal baru untuk ujian pilihan'}
         </p>
       </div>
 
@@ -318,7 +307,6 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
         </div>
       )}
 
-      {/* Pilih Ujian */}
       <div
         style={{
           background: 'white',
@@ -329,15 +317,7 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
           boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
         }}
       >
-        <label
-          style={{
-            fontWeight: 600,
-            display: 'block',
-            marginBottom: '8px',
-            color: '#1e293b',
-            fontSize: '14px',
-          }}
-        >
+        <label style={{ fontWeight: 600, display: 'block', marginBottom: '8px', color: '#1e293b', fontSize: '14px' }}>
           📚 Pilih Ujian
         </label>
         <select
@@ -369,7 +349,6 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
         )}
       </div>
 
-      {/* Form Soal */}
       <div
         style={{
           background: 'white',
@@ -380,17 +359,7 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
           boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
         }}
       >
-        <h2
-          style={{
-            fontSize: '16px',
-            fontWeight: 700,
-            color: '#1e293b',
-            marginBottom: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}
-        >
+        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#1e293b', marginBottom: '16px' }}>
           📝 Teks Soal
         </h2>
         <textarea
@@ -437,26 +406,13 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
           </select>
         </div>
 
-        {/* Gambar soal */}
         <div style={{ marginTop: '20px' }}>
           <p style={{ fontSize: '14px', fontWeight: 500, color: '#1e293b', margin: '0 0 10px' }}>
             📎 Gambar soal (opsional)
           </p>
           {questionImagePreview ? (
-            <div
-              style={{
-                position: 'relative',
-                display: 'inline-block',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-              }}
-            >
-              <img
-                src={questionImagePreview}
-                alt="preview"
-                style={{ maxWidth: '100%', maxHeight: '200px', display: 'block' }}
-              />
+            <div style={{ position: 'relative', display: 'inline-block', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+              <img src={questionImagePreview} alt="preview" style={{ maxWidth: '100%', maxHeight: '200px', display: 'block' }} />
               <button
                 onClick={removeQuestionImage}
                 style={{
@@ -502,26 +458,11 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
               🖼️ Klik untuk upload gambar soal
             </div>
           )}
-          <input
-            ref={questionImageRef}
-            type="file"
-            accept="image/*"
-            onChange={handleQuestionImage}
-            style={{ display: 'none' }}
-          />
+          <input ref={questionImageRef} type="file" accept="image/*" onChange={handleQuestionImage} style={{ display: 'none' }} />
         </div>
 
-        {/* Pembahasan */}
         <div style={{ marginTop: '20px' }}>
-          <label
-            style={{
-              display: 'block',
-              marginBottom: '8px',
-              fontWeight: 600,
-              fontSize: '14px',
-              color: '#1e293b',
-            }}
-          >
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '14px', color: '#1e293b' }}>
             💡 Pembahasan (opsional)
           </label>
           <textarea
@@ -545,7 +486,6 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
         </div>
       </div>
 
-      {/* Pilihan Jawaban */}
       <div
         style={{
           background: 'white',
@@ -556,17 +496,7 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
           boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
         }}
       >
-        <h2
-          style={{
-            fontSize: '16px',
-            fontWeight: 700,
-            color: '#1e293b',
-            marginBottom: '6px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}
-        >
+        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#1e293b', marginBottom: '6px' }}>
           🔤 Pilihan Jawaban
         </h2>
         <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>
@@ -632,11 +562,7 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
               />
               {opt.imageUrl ? (
                 <div style={{ marginTop: '10px', position: 'relative', display: 'inline-block' }}>
-                  <img
-                    src={opt.imageUrl}
-                    alt="pilihan"
-                    style={{ maxHeight: '100px', borderRadius: '8px' }}
-                  />
+                  <img src={opt.imageUrl} alt="pilihan" style={{ maxHeight: '100px', borderRadius: '8px' }} />
                   <button
                     onClick={() => removeOptionImage(opt.id)}
                     style={{
@@ -715,7 +641,6 @@ export default function SoalForm({ mode, initialData, examId: initialExamId }: S
         )}
       </div>
 
-      {/* Tombol Aksi */}
       <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
         <button
           onClick={handleSubmit}

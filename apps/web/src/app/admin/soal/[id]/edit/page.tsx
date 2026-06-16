@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams } from 'next/navigation'
 import AdminSidebar from '@/components/AdminSidebar'
-import SoalForm from '@/components/SoalForm'
+import SoalForm from '@/components/soalform'
 
 function EditSoalContent() {
   const supabase = createClient()

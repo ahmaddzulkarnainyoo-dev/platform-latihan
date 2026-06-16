@@ -3,7 +3,7 @@
 import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import AdminSidebar from '@/components/AdminSidebar'
-import SoalForm from '@/components/SoalForm'
+import SoalForm from '@/components/soalform'   // <- pastikan path ini benar
 
 function TambahSoalContent() {
   const searchParams = useSearchParams()
