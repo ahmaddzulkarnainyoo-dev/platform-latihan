@@ -29,6 +29,11 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname
 
+  // === Rute publik (boleh diakses tanpa login) ===
+  const publicRoutes = ['/', '/login', '/register', '/admin/login']
+  const isPublicRoute = publicRoutes.some(route => path === route)
+
+  // === Proteksi rute privat ===
   // Proteksi /dashboard dan /tryout/* (harus login)
   if ((path.startsWith('/dashboard') || path.startsWith('/tryout')) && !session) {
     return NextResponse.redirect(new URL('/login', request.url))
@@ -39,11 +44,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/admin/login', request.url))
   }
 
-  // Jika sudah login dan akses /login atau /admin/login, redirect ke dashboard/admin
+  // === Redirect jika sudah login dan mengakses rute login/register ===
   if (session) {
+    // Jika sudah login dan akses halaman login user, redirect ke dashboard
     if (path === '/login') {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
+    // Jika sudah login dan akses halaman register, redirect ke dashboard
+    if (path === '/register') {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+    // Jika sudah login dan akses halaman login admin, redirect ke admin
     if (path === '/admin/login') {
       return NextResponse.redirect(new URL('/admin', request.url))
     }

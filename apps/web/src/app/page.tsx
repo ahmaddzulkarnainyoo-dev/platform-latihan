@@ -52,6 +52,47 @@ export default function LandingPage() {
           >
             Masuk
           </Link>
+          <Link
+            href="/register"
+            style={{
+              padding: '10px 24px',
+              background: 'transparent',
+              color: '#1e293b',
+              border: '2px solid #e2e8f0',
+              borderRadius: '12px',
+              textDecoration: 'none',
+              fontWeight: 600,
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#667eea'
+              e.currentTarget.style.color = '#667eea'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#e2e8f0'
+              e.currentTarget.style.color = '#1e293b'
+            }}
+          >
+            Daftar
+          </Link>
+          <Link
+            href="/admin/login"
+            style={{
+              padding: '10px 20px',
+              background: 'transparent',
+              color: '#64748b',
+              border: 'none',
+              borderRadius: '10px',
+              textDecoration: 'none',
+              fontSize: '14px',
+              fontWeight: 500,
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#667eea')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#64748b')}
+          >
+            Admin
+          </Link>
         </div>
       </nav>
 
