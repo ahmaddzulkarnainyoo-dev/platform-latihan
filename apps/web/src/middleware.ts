@@ -17,41 +17,36 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value)
-          )
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set(name, value, options)
-          )
+          })
         },
       },
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession()
 
-  // Jika mengakses /admin/* dan belum login, redirect ke /login
-  if (request.nextUrl.pathname.startsWith('/admin') && !user) {
-    const redirectUrl = new URL('/login', request.url)
-    redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
-    return NextResponse.redirect(redirectUrl)
+  const path = request.nextUrl.pathname
+
+  // Proteksi /dashboard dan /tryout/* (harus login)
+  if ((path.startsWith('/dashboard') || path.startsWith('/tryout')) && !session) {
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Jika mengakses /tryout/* dan belum login, redirect ke /login
-  if (request.nextUrl.pathname.startsWith('/tryout') && !user) {
-    const redirectUrl = new URL('/login', request.url)
-    redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
-    return NextResponse.redirect(redirectUrl)
+  // Proteksi /admin/* (harus login, nanti bisa ditambah role check)
+  if (path.startsWith('/admin') && !session) {
+    return NextResponse.redirect(new URL('/admin/login', request.url))
   }
 
-  // Jika sudah login dan mengakses /login atau /register, redirect ke /admin
-  if ((request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register') && user) {
-    return NextResponse.redirect(new URL('/admin', request.url))
+  // Jika sudah login dan akses /login atau /admin/login, redirect ke dashboard/admin
+  if (session) {
+    if (path === '/login') {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+    if (path === '/admin/login') {
+      return NextResponse.redirect(new URL('/admin', request.url))
+    }
   }
 
   return response

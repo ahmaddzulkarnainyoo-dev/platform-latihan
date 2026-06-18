@@ -3,23 +3,26 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const supabase = createClient()
   const router = useRouter()
 
+  const [role, setRole] = useState<'user' | 'admin'>('user')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
 
-  // Cek session, jika sudah login redirect ke admin
   useEffect(() => {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession()
       if (data.session) {
-        router.push('/admin')
+        // Cek role dari profiles (opsional)
+        // Untuk sementara, redirect ke dashboard dulu
+        router.push('/dashboard')
       }
     }
     checkSession()
@@ -42,7 +45,12 @@ export default function LoginPage() {
     }
 
     if (data.session) {
-      router.push('/admin')
+      // Redirect berdasarkan role
+      if (role === 'admin') {
+        router.push('/admin')
+      } else {
+        router.push('/dashboard')
+      }
     }
     setLoading(false)
   }
@@ -60,7 +68,7 @@ export default function LoginPage() {
         overflow: 'hidden',
       }}
     >
-      {/* Decorative background circles */}
+      {/* Decorative */}
       <div
         style={{
           position: 'absolute',
@@ -89,26 +97,19 @@ export default function LoginPage() {
       <div
         style={{
           width: '100%',
-          maxWidth: '440px',
+          maxWidth: '460px',
           background: 'rgba(255, 255, 255, 0.85)',
           backdropFilter: 'blur(20px)',
           borderRadius: '24px',
           padding: '48px 40px 40px',
-          boxShadow: '0 30px 60px rgba(0,0,0,0.2), 0 10px 20px rgba(0,0,0,0.05)',
+          boxShadow: '0 30px 60px rgba(0,0,0,0.2)',
           border: '1px solid rgba(255,255,255,0.2)',
           animation: 'fadeInUp 0.6s ease-out',
           position: 'relative',
           zIndex: 1,
         }}
       >
-        {/* Logo / Icon */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginBottom: '24px',
-          }}
-        >
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
           <div
             style={{
               width: '72px',
@@ -126,54 +127,80 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Title */}
-        <h1
-          style={{
-            fontSize: '24px',
-            fontWeight: 700,
-            color: '#1e293b',
-            textAlign: 'center',
-            margin: '0 0 4px',
-            letterSpacing: '-0.5px',
-          }}
-        >
-          Platform Latihan
+        <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#1e293b', textAlign: 'center', margin: '0 0 4px' }}>
+          Selamat Datang
         </h1>
-        <p
-          style={{
-            fontSize: '14px',
-            color: '#64748b',
-            textAlign: 'center',
-            margin: '0 0 28px',
-          }}
-        >
-          Masuk ke dashboard admin
+        <p style={{ fontSize: '14px', color: '#64748b', textAlign: 'center', margin: '0 0 28px' }}>
+          Masuk untuk mulai belajar
         </p>
 
-        {/* Welcome message */}
+        {/* Role Toggle */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%)',
+            display: 'flex',
+            background: '#f1f5f9',
+            borderRadius: '12px',
+            padding: '4px',
+            marginBottom: '28px',
+            border: '1px solid #e2e8f0',
+          }}
+        >
+          <button
+            onClick={() => setRole('user')}
+            style={{
+              flex: 1,
+              padding: '10px',
+              borderRadius: '10px',
+              border: 'none',
+              background: role === 'user' ? 'white' : 'transparent',
+              color: role === 'user' ? '#1e293b' : '#64748b',
+              fontWeight: 600,
+              fontSize: '14px',
+              cursor: 'pointer',
+              boxShadow: role === 'user' ? '0 4px 12px rgba(0,0,0,0.06)' : 'none',
+              transition: 'all 0.3s',
+            }}
+          >
+            🧑‍🎓 Peserta
+          </button>
+          <button
+            onClick={() => setRole('admin')}
+            style={{
+              flex: 1,
+              padding: '10px',
+              borderRadius: '10px',
+              border: 'none',
+              background: role === 'admin' ? 'white' : 'transparent',
+              color: role === 'admin' ? '#1e293b' : '#64748b',
+              fontWeight: 600,
+              fontSize: '14px',
+              cursor: 'pointer',
+              boxShadow: role === 'admin' ? '0 4px 12px rgba(0,0,0,0.06)' : 'none',
+              transition: 'all 0.3s',
+            }}
+          >
+            👤 Admin
+          </button>
+        </div>
+
+        {/* Welcome Message sesuai role */}
+        <div
+          style={{
+            background: role === 'admin' ? '#f0f4ff' : '#f0fdf4',
             borderRadius: '12px',
             padding: '14px 18px',
             marginBottom: '28px',
-            border: '1px solid #e8edff',
+            border: role === 'admin' ? '1px solid #dbeafe' : '1px solid #bbf7d0',
             textAlign: 'center',
           }}
         >
-          <p
-            style={{
-              fontSize: '14px',
-              fontWeight: 500,
-              color: '#4a3f7a',
-              margin: 0,
-            }}
-          >
-            👋 Selamat datang kembali! Silakan masuk untuk mengelola platform.
+          <p style={{ fontSize: '14px', fontWeight: 500, color: role === 'admin' ? '#1e40af' : '#166534', margin: 0 }}>
+            {role === 'admin'
+              ? '🔐 Masuk sebagai admin untuk mengelola platform.'
+              : '📝 Masuk sebagai peserta untuk mulai latihan soal.'}
           </p>
         </div>
 
-        {/* Error message */}
         {error && (
           <div
             style={{
@@ -194,18 +221,9 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleLogin}>
           <div style={{ marginBottom: '18px' }}>
-            <label
-              style={{
-                display: 'block',
-                fontSize: '13px',
-                fontWeight: 600,
-                color: '#1e293b',
-                marginBottom: '6px',
-              }}
-            >
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#1e293b', marginBottom: '6px' }}>
               Email
             </label>
             <div
@@ -232,7 +250,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@email.com"
+                placeholder={role === 'admin' ? 'admin@email.com' : 'email@example.com'}
                 required
                 style={{
                   width: '100%',
@@ -249,15 +267,7 @@ export default function LoginPage() {
           </div>
 
           <div style={{ marginBottom: '22px' }}>
-            <label
-              style={{
-                display: 'block',
-                fontSize: '13px',
-                fontWeight: 600,
-                color: '#1e293b',
-                marginBottom: '6px',
-              }}
-            >
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#1e293b', marginBottom: '6px' }}>
               Password
             </label>
             <div
@@ -312,21 +322,6 @@ export default function LoginPage() {
                 {showPassword ? '👁️' : '👁️‍🗨️'}
               </button>
             </div>
-            <div style={{ textAlign: 'right', marginTop: '8px' }}>
-              <a
-                href="#"
-                style={{
-                  fontSize: '12px',
-                  color: '#64748b',
-                  textDecoration: 'none',
-                  transition: 'color 0.2s',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#667eea')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#64748b')}
-              >
-                Lupa password?
-              </a>
-            </div>
           </div>
 
           <button
@@ -335,9 +330,7 @@ export default function LoginPage() {
             style={{
               width: '100%',
               padding: '14px',
-              background: loading
-                ? '#94a3b8'
-                : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: loading ? '#94a3b8' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               color: 'white',
               border: 'none',
               borderRadius: '12px',
@@ -346,7 +339,6 @@ export default function LoginPage() {
               cursor: loading ? 'not-allowed' : 'pointer',
               boxShadow: '0 6px 20px rgba(102, 126, 234, 0.35)',
               transition: 'all 0.3s',
-              position: 'relative',
             }}
             onMouseEnter={(e) => {
               if (!loading) {
@@ -361,26 +353,18 @@ export default function LoginPage() {
               }
             }}
           >
-            {loading ? 'Memproses...' : '🚀 Masuk'}
+            {loading ? 'Memproses...' : `🚀 Masuk sebagai ${role === 'admin' ? 'Admin' : 'Peserta'}`}
           </button>
         </form>
 
-        {/* Footer */}
-        <p
-          style={{
-            fontSize: '12px',
-            color: '#94a3b8',
-            textAlign: 'center',
-            marginTop: '24px',
-            borderTop: '1px solid #e2e8f0',
-            paddingTop: '20px',
-          }}
-        >
-          Platform Latihan Soal © 2026
+        <p style={{ fontSize: '12px', color: '#94a3b8', textAlign: 'center', marginTop: '24px', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
+          Belum punya akun? <Link href="/register" style={{ color: '#667eea', textDecoration: 'none', fontWeight: 500 }}>Daftar</Link>
+        </p>
+        <p style={{ fontSize: '12px', color: '#94a3b8', textAlign: 'center', marginTop: '8px' }}>
+          <Link href="/" style={{ color: '#94a3b8', textDecoration: 'none' }}>← Kembali ke Beranda</Link>
         </p>
       </div>
 
-      {/* CSS Animation */}
       <style jsx>{`
         @keyframes fadeInUp {
           from {
