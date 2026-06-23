@@ -1,185 +1,331 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import AdminSidebar from '@/components/AdminSidebar'
+
+interface Stats {
+  totalExams: number
+  totalQuestions: number
+  totalCategories: number
+  totalUsers: number
+  totalAttempts: number
+  averageScore: number
+  totalCorrect: number
+  totalWrong: number
+}
 
 export default function AdminDashboard() {
-  const [user, setUser] = useState<any>(null)
-  const router = useRouter()
   const supabase = createClient()
+  const router = useRouter()
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<Stats>({
+    totalExams: 0,
+    totalQuestions: 0,
+    totalCategories: 0,
+    totalUsers: 0,
+    totalAttempts: 0,
+    averageScore: 0,
+    totalCorrect: 0,
+    totalWrong: 0,
+  })
+  const [recentAttempts, setRecentAttempts] = useState<any[]>([])
+  const [userName, setUserName] = useState('Admin')
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) router.push('/login')
-      else setUser(data.user)
-    })
+    loadStats()
   }, [])
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/login')
+  const loadStats = async () => {
+    setLoading(true)
+
+    try {
+      // Ambil session untuk nama user
+      const { data: sessionData } = await supabase.auth.getSession()
+      if (sessionData.session?.user?.email) {
+        setUserName(sessionData.session.user.email.split('@')[0])
+      }
+
+      // 1. Total Ujian
+      const { count: totalExams, error: e1 } = await supabase
+        .from('exams')
+        .select('*', { count: 'exact', head: true })
+
+      // 2. Total Soal
+      const { count: totalQuestions, error: e2 } = await supabase
+        .from('questions')
+        .select('*', { count: 'exact', head: true })
+
+      // 3. Total Kategori
+      const { count: totalCategories, error: e3 } = await supabase
+        .from('categories')
+        .select('*', { count: 'exact', head: true })
+
+      // 4. Total User (dari auth.users)
+      const { count: totalUsers, error: e4 } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+
+      // 5. Total Tryout (exam_attempts)
+      const { count: totalAttempts, error: e5 } = await supabase
+        .from('exam_attempts')
+        .select('*', { count: 'exact', head: true })
+
+      // 6. Rata-rata skor & total benar/salah
+      const { data: attemptsData, error: e6 } = await supabase
+        .from('exam_attempts')
+        .select('score, correct_count, total_answered')
+        .eq('status', 'completed')
+
+      let averageScore = 0
+      let totalCorrect = 0
+      let totalWrong = 0
+
+      if (attemptsData && attemptsData.length > 0) {
+        const totalScore = attemptsData.reduce((sum, a) => sum + (a.score || 0), 0)
+        averageScore = Math.round(totalScore / attemptsData.length)
+        totalCorrect = attemptsData.reduce((sum, a) => sum + (a.correct_count || 0), 0)
+        totalWrong = attemptsData.reduce((sum, a) => sum + ((a.total_answered || 0) - (a.correct_count || 0)), 0)
+      }
+
+      // 7. Recent attempts (5 terakhir)
+      const { data: recent, error: e7 } = await supabase
+        .from('exam_attempts')
+        .select(`
+          *,
+          exams ( title ),
+          profiles ( full_name )
+        `)
+        .eq('status', 'completed')
+        .order('finished_at', { ascending: false })
+        .limit(5)
+
+      if (recent) setRecentAttempts(recent)
+
+      setStats({
+        totalExams: totalExams || 0,
+        totalQuestions: totalQuestions || 0,
+        totalCategories: totalCategories || 0,
+        totalUsers: totalUsers || 0,
+        totalAttempts: totalAttempts || 0,
+        averageScore,
+        totalCorrect,
+        totalWrong,
+      })
+    } catch (error) {
+      console.error('Error loading stats:', error)
+    }
+
+    setLoading(false)
   }
 
-  if (!user) return null
-
-  const navItems = [
-    { label: 'Dashboard', icon: '🏠', href: '/admin' },
-    { label: 'Kategori', icon: '📚', href: '/admin/kategori' },
-    { label: 'Ujian', icon: '📝', href: '/admin/ujian' },
-    { label: 'Soal', icon: '❓', href: '/admin/soal' },
-    { label: 'Pengguna', icon: '👥', href: '/admin/pengguna' },
-  ]
-
-  const stats = [
-    { label: 'Total Kategori', value: '3', icon: '📚', bg: '#dbeafe', color: '#1d4ed8' },
-    { label: 'Total Ujian', value: '0', icon: '📝', bg: '#dcfce7', color: '#15803d' },
-    { label: 'Total Soal', value: '0', icon: '❓', bg: '#fef9c3', color: '#a16207' },
-  ]
-
-  const quickActions = [
-    { label: '+ Tambah Soal', href: '/admin/soal/tambah', bg: '#2563eb' },
-    { label: '+ Buat Ujian', href: '/admin/ujian/tambah', bg: '#16a34a' },
-    { label: '+ Tambah Kategori', href: '/admin/kategori/tambah', bg: '#9333ea' },
+  const cardData = [
+    { label: 'Total Ujian', value: stats.totalExams, icon: '📝', color: '#667eea', bg: '#eff6ff' },
+    { label: 'Total Soal', value: stats.totalQuestions, icon: '❓', color: '#f59e0b', bg: '#fffbeb' },
+    { label: 'Total Kategori', value: stats.totalCategories, icon: '📚', color: '#10b981', bg: '#ecfdf5' },
+    { label: 'Total User', value: stats.totalUsers, icon: '👥', color: '#8b5cf6', bg: '#f5f3ff' },
+    { label: 'Total Tryout', value: stats.totalAttempts, icon: '📊', color: '#ef4444', bg: '#fef2f2' },
+    { label: 'Rata-rata Skor', value: `${stats.averageScore}%`, icon: '⭐', color: '#f472b6', bg: '#fdf2f8' },
   ]
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f8fafc' }}>
+      <AdminSidebar activePath="/admin" />
 
-      {/* Sidebar */}
-      <div style={{
-        width: '240px',
-        background: 'white',
-        borderRight: '1px solid #e2e8f0',
-        padding: '24px 0',
-        display: 'flex',
-        flexDirection: 'column',
-        flexShrink: 0,
-      }}>
-        <div style={{ padding: '0 24px 24px', borderBottom: '1px solid #e2e8f0' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#1e293b', margin: 0 }}>
-            Platform Latihan
-          </h2>
-          <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0' }}>Admin Panel</p>
-        </div>
-
-        <nav style={{ padding: '16px 12px', flex: 1 }}>
-          {navItems.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: '10px 12px',
-                borderRadius: '8px',
-                color: '#374151',
-                textDecoration: 'none',
-                fontSize: '14px',
-                marginBottom: '4px',
-                fontWeight: 500,
-              }}
-            >
-              <span>{item.icon}</span>
-              <span>{item.label}</span>
-            </a>
-          ))}
-        </nav>
-
-        <div style={{ padding: '16px 24px', borderTop: '1px solid #e2e8f0' }}>
-          <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', wordBreak: 'break-all' }}>
-            {user.email}
+      <div style={{ flex: 1, padding: '32px' }}>
+        {/* Header */}
+        <div
+          style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '16px',
+            padding: '28px 32px',
+            marginBottom: '28px',
+            color: 'white',
+            boxShadow: '0 10px 40px rgba(102, 126, 234, 0.3)',
+          }}
+        >
+          <h1 style={{ fontSize: '24px', fontWeight: 700, margin: '0 0 4px' }}>
+            👋 Selamat Datang, {userName}!
+          </h1>
+          <p style={{ opacity: 0.9, margin: 0, fontSize: '15px' }}>
+            Ini adalah dashboard administrasi Platform Latihan.
           </p>
-          <button
-            onClick={handleLogout}
-            style={{
-              width: '100%',
-              padding: '8px',
-              background: '#fee2e2',
-              color: '#dc2626',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: 500,
-              cursor: 'pointer',
-            }}
-          >
-            Keluar
-          </button>
         </div>
-      </div>
 
-      {/* Main content */}
-      <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
-          Selamat datang! 👋
-        </h1>
-        <p style={{ color: '#64748b', marginBottom: '32px', marginTop: 0 }}>
-          Kelola soal, ujian, dan pengguna dari sini.
-        </p>
-
-        {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
-          {stats.map((stat) => (
+        {/* Loading */}
+        {loading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
+            <p style={{ color: '#64748b' }}>Memuat data...</p>
+          </div>
+        ) : (
+          <>
+            {/* Card Statistik */}
             <div
-              key={stat.label}
               style={{
-                background: 'white',
-                borderRadius: '12px',
-                padding: '24px',
-                border: '1px solid #e2e8f0',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '16px',
+                marginBottom: '32px',
               }}
             >
-              <div style={{
-                width: '40px',
-                height: '40px',
-                background: stat.bg,
-                borderRadius: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '20px',
-                marginBottom: '12px',
-              }}>
-                {stat.icon}
-              </div>
-              <div style={{ fontSize: '28px', fontWeight: 700, color: '#1e293b' }}>{stat.value}</div>
-              <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>{stat.label}</div>
+              {cardData.map((card, i) => (
+                <div
+                  key={i}
+                  style={{
+                    background: 'white',
+                    borderRadius: '14px',
+                    padding: '20px 18px',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+                    transition: 'all 0.3s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)'
+                    e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.06)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.04)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div
+                      style={{
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '12px',
+                        background: card.bg,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '22px',
+                      }}
+                    >
+                      {card.icon}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '13px', color: '#64748b', fontWeight: 500 }}>{card.label}</div>
+                      <div style={{ fontSize: '24px', fontWeight: 700, color: '#1e293b' }}>{card.value}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {/* Quick actions */}
-        <div style={{
-          background: 'white',
-          borderRadius: '12px',
-          padding: '24px',
-          border: '1px solid #e2e8f0',
-        }}>
-          <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#1e293b', marginBottom: '16px', marginTop: 0 }}>
-            Aksi cepat
-          </h2>
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            {quickActions.map((action) => (
-              <a
-                key={action.href}
-                href={action.href}
+            {/* Statistik Tambahan */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '32px' }}>
+              <div
                 style={{
-                  padding: '10px 20px',
-                  background: action.bg,
-                  color: 'white',
-                  borderRadius: '8px',
-                  textDecoration: 'none',
-                  fontSize: '14px',
-                  fontWeight: 500,
+                  background: 'white',
+                  borderRadius: '14px',
+                  padding: '20px 24px',
+                  border: '1px solid #e2e8f0',
                 }}
               >
-                {action.label}
-              </a>
-            ))}
-          </div>
-        </div>
+                <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1e293b', margin: '0 0 12px' }}>
+                  📈 Detail Jawaban
+                </h3>
+                <div style={{ display: 'flex', gap: '24px' }}>
+                  <div>
+                    <div style={{ fontSize: '12px', color: '#64748b' }}>Benar</div>
+                    <div style={{ fontSize: '20px', fontWeight: 700, color: '#22c55e' }}>{stats.totalCorrect}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '12px', color: '#64748b' }}>Salah</div>
+                    <div style={{ fontSize: '20px', fontWeight: 700, color: '#ef4444' }}>{stats.totalWrong}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '12px', color: '#64748b' }}>Akurasi</div>
+                    <div style={{ fontSize: '20px', fontWeight: 700, color: '#667eea' }}>
+                      {stats.totalCorrect + stats.totalWrong > 0
+                        ? Math.round((stats.totalCorrect / (stats.totalCorrect + stats.totalWrong)) * 100)
+                        : 0}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                style={{
+                  background: 'white',
+                  borderRadius: '14px',
+                  padding: '20px 24px',
+                  border: '1px solid #e2e8f0',
+                }}
+              >
+                <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1e293b', margin: '0 0 12px' }}>
+                  🏆 Ujian Terpopuler
+                </h3>
+                <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>
+                  {stats.totalAttempts > 0
+                    ? `Sudah ada ${stats.totalAttempts} kali tryout yang diselesaikan.`
+                    : 'Belum ada tryout yang dikerjakan.'}
+                </p>
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            {recentAttempts.length > 0 && (
+              <div
+                style={{
+                  background: 'white',
+                  borderRadius: '14px',
+                  padding: '20px 24px',
+                  border: '1px solid #e2e8f0',
+                }}
+              >
+                <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1e293b', margin: '0 0 16px' }}>
+                  🕐 Aktivitas Terbaru
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {recentAttempts.map((attempt) => (
+                    <div
+                      key={attempt.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '10px 0',
+                        borderBottom: '1px solid #f1f5f9',
+                      }}
+                    >
+                      <div>
+                        <span style={{ fontWeight: 500, color: '#1e293b' }}>
+                          {attempt.profiles?.full_name || attempt.exams?.title || 'User'}
+                        </span>
+                        <span style={{ fontSize: '13px', color: '#64748b', marginLeft: '8px' }}>
+                          menyelesaikan "{attempt.exams?.title || 'Ujian'}"
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span
+                          style={{
+                            padding: '2px 12px',
+                            borderRadius: '20px',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            background: attempt.score >= 70 ? '#dcfce7' : '#fee2e2',
+                            color: attempt.score >= 70 ? '#15803d' : '#dc2626',
+                          }}
+                        >
+                          {attempt.score || 0}%
+                        </span>
+                        <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                          {new Date(attempt.finished_at || '').toLocaleDateString('id-ID', {
+                            day: 'numeric',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   )
