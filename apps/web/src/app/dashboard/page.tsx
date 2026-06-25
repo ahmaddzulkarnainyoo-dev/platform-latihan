@@ -65,23 +65,76 @@ export default function DashboardPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
-      {/* Navbar */}
+      {/* Navbar Premium */}
       <nav
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           padding: '16px 32px',
-          background: 'white',
+          background: 'rgba(255,255,255,0.9)',
+          backdropFilter: 'blur(12px)',
           borderBottom: '1px solid #e2e8f0',
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '24px' }}>📚</span>
-          <span style={{ fontWeight: 700, fontSize: '18px', color: '#1e293b' }}>Platform Latihan</span>
+          <span style={{ fontWeight: 700, fontSize: '18px', color: '#1e293b', letterSpacing: '-0.5px' }}>Platform Latihan</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <span style={{ fontSize: '14px', color: '#64748b' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Link
+            href="/dashboard"
+            style={{
+              padding: '8px 16px',
+              background: '#eff6ff',
+              color: '#2563eb',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              fontSize: '13px',
+              fontWeight: 600,
+              transition: 'all 0.2s',
+            }}
+          >
+            📊 Dashboard
+          </Link>
+          <Link
+            href="/profile"
+            style={{
+              padding: '8px 16px',
+              background: 'transparent',
+              color: '#475569',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              fontSize: '13px',
+              fontWeight: 500,
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#f1f5f9' }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+          >
+            👤 Profil
+          </Link>
+          <Link
+            href="/leaderboard"
+            style={{
+              padding: '8px 16px',
+              background: 'transparent',
+              color: '#475569',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              fontSize: '13px',
+              fontWeight: 500,
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#f1f5f9' }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+          >
+            🏆 Leaderboard
+          </Link>
+          <span style={{ fontSize: '13px', color: '#64748b', padding: '0 8px' }}>
             👋 {user?.email?.split('@')[0] || 'User'}
           </span>
           <button
@@ -116,7 +169,7 @@ export default function DashboardPage() {
             boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)',
           }}
         >
-          <h1 style={{ fontSize: '28px', fontWeight: 700, margin: '0 0 8px' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: 700, margin: '0 0 8px', letterSpacing: '-0.5px' }}>
             Selamat Datang, {user?.email?.split('@')[0] || 'User'}! 👋
           </h1>
           <p style={{ opacity: 0.9, margin: 0, fontSize: '16px' }}>
@@ -125,7 +178,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Ujian Tersedia */}
-        <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1e293b', marginBottom: '16px' }}>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1e293b', marginBottom: '16px', letterSpacing: '-0.5px' }}>
           📝 Ujian Tersedia
         </h2>
 
@@ -138,6 +191,7 @@ export default function DashboardPage() {
               textAlign: 'center',
               border: '1px solid #e2e8f0',
               marginBottom: '32px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
             }}
           >
             <p style={{ fontSize: '40px', margin: '0 0 16px' }}>📭</p>
@@ -164,15 +218,16 @@ export default function DashboardPage() {
                   textDecoration: 'none',
                   transition: 'all 0.3s',
                   display: 'block',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-4px)'
-                  e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.08)'
+                  e.currentTarget.style.boxShadow = '0 12px 30px rgba(0,0,0,0.08)'
                   e.currentTarget.style.borderColor = '#667eea'
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = 'none'
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.04)'
                   e.currentTarget.style.borderColor = '#e2e8f0'
                 }}
               >
@@ -190,7 +245,18 @@ export default function DashboardPage() {
                 </p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '13px', color: '#64748b' }}>{exam.total_questions || 0} soal</span>
-                  <span style={{ padding: '6px 16px', background: '#2563eb', color: 'white', borderRadius: '8px', fontSize: '13px', fontWeight: 500 }}>
+                  <span
+                    style={{
+                      padding: '6px 16px',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: 'white',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+                      transition: 'all 0.3s',
+                    }}
+                  >
                     Mulai →
                   </span>
                 </div>
@@ -202,7 +268,7 @@ export default function DashboardPage() {
         {/* Riwayat */}
         {attempts.length > 0 && (
           <>
-            <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1e293b', marginBottom: '16px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1e293b', marginBottom: '16px', letterSpacing: '-0.5px' }}>
               📊 Riwayat Latihan
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -217,6 +283,18 @@ export default function DashboardPage() {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                    transition: 'all 0.3s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.06)'
+                    e.currentTarget.style.borderColor = '#667eea'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.03)'
+                    e.currentTarget.style.borderColor = '#e2e8f0'
                   }}
                 >
                   <div>

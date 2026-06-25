@@ -88,44 +88,161 @@ function DaftarSoalContent() {
       <AdminSidebar activePath="/admin/soal" />
 
       <div style={{ flex: 1, padding: '32px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1e293b', margin: 0 }}>❓ Daftar Soal</h1>
+        {/* Gradient Header */}
+        <div
+          style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '16px',
+            padding: '28px 32px',
+            marginBottom: '28px',
+            color: 'white',
+            boxShadow: '0 10px 40px rgba(102, 126, 234, 0.3)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '16px',
+          }}
+        >
+          <div>
+            <h1 style={{ fontSize: '24px', fontWeight: 700, margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              ❓ Daftar Soal
+            </h1>
+            <p style={{ opacity: 0.9, margin: 0, fontSize: '15px' }}>
+              Kelola soal-soal untuk setiap ujian tryout
+            </p>
+          </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             <select
               value={filterExamId}
               onChange={(e) => setFilterExamId(e.target.value)}
-              style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', background: 'white' }}
+              style={{
+                padding: '10px 16px',
+                borderRadius: '10px',
+                border: '2px solid rgba(255,255,255,0.3)',
+                fontSize: '14px',
+                background: 'rgba(255,255,255,0.15)',
+                color: 'white',
+                cursor: 'pointer',
+                outline: 'none',
+                transition: 'all 0.2s',
+              }}
+              onFocus={(e) => (e.target.style.borderColor = 'white')}
+              onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.3)')}
             >
-              <option value="">Semua Ujian</option>
+              <option value="" style={{ color: '#1e293b' }}>Semua Ujian</option>
               {exams.map((exam) => (
-                <option key={exam.id} value={exam.id}>{exam.title}</option>
+                <option key={exam.id} value={exam.id} style={{ color: '#1e293b' }}>{exam.title}</option>
               ))}
             </select>
-            <a href="/admin/soal/tambah" style={{ padding: '10px 20px', background: '#2563eb', color: 'white', borderRadius: '10px', textDecoration: 'none', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+            <a
+              href="/admin/soal/tambah"
+              style={{
+                padding: '10px 24px',
+                background: 'white',
+                color: '#667eea',
+                borderRadius: '10px',
+                textDecoration: 'none',
+                fontSize: '14px',
+                fontWeight: 600,
+                boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
+                transition: 'all 0.3s',
+                whiteSpace: 'nowrap',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.25)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)'
+              }}
+            >
               + Tambah Soal
             </a>
           </div>
         </div>
 
         {loading ? (
-          <p style={{ color: '#64748b' }}>Memuat...</p>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
+            <p style={{ color: '#64748b' }}>Memuat...</p>
+          </div>
         ) : soal.length === 0 ? (
-          <div style={{ background: 'white', borderRadius: '16px', padding: '48px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+          <div style={{ background: 'white', borderRadius: '16px', padding: '48px', textAlign: 'center', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.04)' }}>
             <p style={{ fontSize: '40px', margin: '0 0 16px' }}>📭</p>
             <p style={{ color: '#64748b', fontSize: '15px' }}>
               {filterExamId ? 'Tidak ada soal untuk ujian ini.' : 'Belum ada soal. Tambahkan soal pertama!'}
             </p>
-            <a href="/admin/soal/tambah" style={{ display: 'inline-block', marginTop: '16px', padding: '10px 24px', background: '#2563eb', color: 'white', borderRadius: '8px', textDecoration: 'none', fontSize: '14px' }}>
+            <a
+              href="/admin/soal/tambah"
+              style={{
+                display: 'inline-block',
+                marginTop: '16px',
+                padding: '12px 28px',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                borderRadius: '12px',
+                textDecoration: 'none',
+                fontSize: '14px',
+                fontWeight: 600,
+                boxShadow: '0 6px 20px rgba(102, 126, 234, 0.3)',
+                transition: 'all 0.3s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 10px 30px rgba(102, 126, 234, 0.45)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.3)'
+              }}
+            >
               + Tambah Soal
             </a>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {soal.map((q) => (
-              <div key={q.id} style={{ background: 'white', borderRadius: '12px', padding: '20px 24px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px' }}>
+              <div
+                key={q.id}
+                style={{
+                  background: 'white',
+                  borderRadius: '12px',
+                  padding: '20px 24px',
+                  border: '1px solid #e2e8f0',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: '16px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                  transition: 'all 0.3s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.06)'
+                  e.currentTarget.style.borderColor = '#667eea'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.03)'
+                  e.currentTarget.style.borderColor = '#e2e8f0'
+                }}
+              >
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px', flexWrap: 'wrap' }}>
-                    <span style={{ padding: '2px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 500, background: q.question_type === 'single' ? '#dbeafe' : '#fef3c7', color: q.question_type === 'single' ? '#1d4ed8' : '#b45309' }}>
+                    <span
+                      style={{
+                        padding: '2px 12px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        background: q.question_type === 'single' ? '#dbeafe' : '#fef3c7',
+                        color: q.question_type === 'single' ? '#1d4ed8' : '#b45309',
+                      }}
+                    >
                       {q.question_type === 'single' ? 'Satu jawaban' : 'Banyak jawaban'}
                     </span>
                     <span style={{ fontSize: '13px', color: '#64748b' }}>📚 {q.exams?.title || '(tanpa ujian)'}</span>
@@ -142,14 +259,38 @@ function DaftarSoalContent() {
                     <div style={{ fontSize: '13px', color: '#64748b', marginTop: '8px', fontStyle: 'italic' }}>💡 {q.explanation}</div>
                   )}
                 </div>
-                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                  <a href={`/admin/soal/${q.id}/edit`} style={{ padding: '8px 14px', background: '#eff6ff', color: '#2563eb', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: 500 }}>
+                <div style={{ display: 'flex', gap: '8px', flexShrink: 0, alignItems: 'center' }}>
+                  <a
+                    href={`/admin/soal/${q.id}/edit`}
+                    style={{
+                      padding: '8px 16px',
+                      background: '#eff6ff',
+                      color: '#2563eb',
+                      borderRadius: '8px',
+                      textDecoration: 'none',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#dbeafe' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = '#eff6ff' }}
+                  >
                     ✏️ Edit
                   </a>
                   <button
                     onClick={() => handleDelete(q.id)}
                     disabled={deletingId === q.id}
-                    style={{ padding: '8px 14px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+                    style={{
+                      padding: '8px 16px',
+                      background: '#fee2e2',
+                      color: '#dc2626',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      cursor: deletingId === q.id ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s',
+                    }}
                   >
                     {deletingId === q.id ? '...' : '🗑️ Hapus'}
                   </button>
