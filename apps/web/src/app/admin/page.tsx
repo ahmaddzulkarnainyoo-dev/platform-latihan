@@ -32,6 +32,7 @@ export default function AdminDashboard() {
   })
   const [recentAttempts, setRecentAttempts] = useState<any[]>([])
   const [userName, setUserName] = useState('Admin')
+  const [showExportMenu, setShowExportMenu] = useState(false)
 
   useEffect(() => {
     loadStats()
@@ -143,14 +144,134 @@ export default function AdminDashboard() {
             marginBottom: '28px',
             color: 'white',
             boxShadow: '0 10px 40px rgba(102, 126, 234, 0.3)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}
         >
-          <h1 style={{ fontSize: '24px', fontWeight: 700, margin: '0 0 4px' }}>
-            👋 Selamat Datang, {userName}!
-          </h1>
-          <p style={{ opacity: 0.9, margin: 0, fontSize: '15px' }}>
-            Ini adalah dashboard administrasi Platform Latihan.
-          </p>
+          <div>
+            <h1 style={{ fontSize: '24px', fontWeight: 700, margin: '0 0 4px' }}>
+              👋 Selamat Datang, {userName}!
+            </h1>
+            <p style={{ opacity: 0.9, margin: 0, fontSize: '15px' }}>
+              Ini adalah dashboard administrasi Platform Latihan.
+            </p>
+          </div>
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              style={{
+                padding: '12px 24px',
+                background: 'rgba(255,255,255,0.2)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                borderRadius: '12px',
+                color: 'white',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.3)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.2)'
+              }}
+            >
+              📥 Export Data
+            </button>
+            {showExportMenu && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '8px',
+                  background: 'white',
+                  borderRadius: '12px',
+                  boxShadow: '0 20px 50px rgba(0,0,0,0.2)',
+                  border: '1px solid #e2e8f0',
+                  overflow: 'hidden',
+                  minWidth: '220px',
+                  zIndex: 100,
+                }}
+              >
+                <div
+                  style={{
+                    padding: '10px 16px',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    color: '#64748b',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    borderBottom: '1px solid #f1f5f9',
+                  }}
+                >
+                  Pilih Data
+                </div>
+                <a
+                  href="/api/admin/export?type=users"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '12px 16px',
+                    color: '#1e293b',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    transition: 'background 0.15s',
+                    borderBottom: '1px solid #f1f5f9',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#f8fafc')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <span style={{ fontSize: '18px' }}>👥</span>
+                  Export Data User
+                </a>
+                <a
+                  href="/api/admin/export?type=attempts"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '12px 16px',
+                    color: '#1e293b',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    transition: 'background 0.15s',
+                    borderBottom: '1px solid #f1f5f9',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#f8fafc')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <span style={{ fontSize: '18px' }}>📊</span>
+                  Export Hasil Tryout
+                </a>
+                <a
+                  href="/api/admin/export?type=all"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '12px 16px',
+                    color: '#1e293b',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#f8fafc')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <span style={{ fontSize: '18px' }}>📦</span>
+                  Export Semua Data
+                </a>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Loading */}

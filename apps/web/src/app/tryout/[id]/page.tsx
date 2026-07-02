@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useParams } from 'next/navigation'
+import AttentionTryout from '@/components/AttentionTryout'
 
 type AnswersType = Record<string, string[]> // question_id -> array of option_ids
 
@@ -13,6 +14,8 @@ export default function TryoutPage() {
   const supabase = createClient()
 
   const [exam, setExam] = useState<any>(null)
+  const [attentionTest, setAttentionTest] = useState<any>(null)
+  const [mode, setMode] = useState<'normal' | 'attention' | null>(null)
   const [questions, setQuestions] = useState<any[]>([])
   const [answers, setAnswers] = useState<AnswersType>({})
   const [currentIdx, setCurrentIdx] = useState(0)
@@ -31,13 +34,27 @@ export default function TryoutPage() {
   const loadExam = async () => {
     const { data: examData } = await supabase
       .from('exams')
-      .select('*, categories(name)')
+      .select('*, categories(name), attention_tests(*)')
       .eq('id', examId)
       .single()
 
     if (!examData) { router.push('/'); return }
     setExam(examData)
+
+    // Check if this is an attention test exam
+    if (examData.attention_test_id) {
+      const attentionTestData = examData.attention_tests
+      if (attentionTestData) {
+        setAttentionTest(attentionTestData)
+        setMode('attention')
+        setLoading(false)
+        return
+      }
+    }
+
+    // Normal tryout mode
     setTimeLeft(examData.duration_minutes * 60)
+    setMode('normal')
 
     const { data: qData } = await supabase
       .from('questions')
@@ -144,6 +161,11 @@ export default function TryoutPage() {
       <p style={{ color: '#64748b' }}>Memuat soal...</p>
     </div>
   )
+
+  // Render attention test mode
+  if (mode === 'attention' && attentionTest) {
+    return <AttentionTryout exam={exam} attentionTest={attentionTest} />
+  }
 
   if (!started) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>

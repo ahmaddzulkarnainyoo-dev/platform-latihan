@@ -324,6 +324,12 @@ export default function LoginPage() {
             </div>
           </div>
 
+          <div style={{ textAlign: 'right', marginBottom: '20px' }}>
+            <Link href="/forgot-password" style={{ color: '#667eea', textDecoration: 'none', fontSize: '13px', fontWeight: 500 }}>
+              Lupa password?
+            </Link>
+          </div>
+
           <button
             type="submit"
             disabled={loading}

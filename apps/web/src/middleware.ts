@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
 
   // === Rute publik (boleh diakses tanpa login) ===
-  const publicRoutes = ['/', '/login', '/register', '/admin/login']
+  const publicRoutes = ['/', '/login', '/register', '/admin/login', '/forgot-password', '/reset-password']
   const isPublicRoute = publicRoutes.some(route => path === route)
 
   // === Proteksi rute privat ===

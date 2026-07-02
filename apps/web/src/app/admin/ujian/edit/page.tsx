@@ -12,11 +12,13 @@ export default function EditUjian() {
   const ujianId = params.id as string
 
   const [categories, setCategories] = useState<any[]>([])
+  const [attentionTests, setAttentionTests] = useState<any[]>([])
   const [title, setTitle] = useState('')
   const [categoryId, setCategoryId] = useState('')
   const [durationMinutes, setDurationMinutes] = useState(60)
   const [passingScore, setPassingScore] = useState(70)
   const [isPublished, setIsPublished] = useState(false)
+  const [attentionTestId, setAttentionTestId] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
@@ -24,12 +26,22 @@ export default function EditUjian() {
 
   useEffect(() => {
     loadCategories()
+    loadAttentionTests()
     loadExam()
   }, [])
 
   const loadCategories = async () => {
     const { data } = await supabase.from('categories').select('id, name').order('name')
     if (data) setCategories(data)
+  }
+
+  const loadAttentionTests = async () => {
+    const { data } = await supabase
+      .from('attention_tests')
+      .select('id, title, item_type')
+      .eq('is_published', true)
+      .order('title')
+    if (data) setAttentionTests(data)
   }
 
   const loadExam = async () => {
@@ -50,6 +62,7 @@ export default function EditUjian() {
     setDurationMinutes(data.duration_minutes)
     setPassingScore(data.passing_score)
     setIsPublished(data.is_published)
+    setAttentionTestId(data.attention_test_id || '')
     setLoading(false)
   }
 
@@ -83,6 +96,7 @@ export default function EditUjian() {
         duration_minutes: durationMinutes,
         passing_score: passingScore,
         is_published: isPublished,
+        attention_test_id: attentionTestId || null,
       })
       .eq('id', ujianId)
 
@@ -271,6 +285,44 @@ export default function EditUjian() {
                 e.target.style.boxShadow = 'none'
               }}
             />
+          </div>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '14px', color: '#1e293b' }}>
+              🧠 Tes Kecermatan (Opsional)
+            </label>
+            <select
+              value={attentionTestId}
+              onChange={(e) => setAttentionTestId(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                borderRadius: '10px',
+                border: '2px solid #e2e8f0',
+                fontSize: '14px',
+                color: '#1e293b',
+                background: 'white',
+                transition: 'all 0.2s',
+                boxSizing: 'border-box',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#667eea'
+                e.target.style.boxShadow = '0 0 0 4px rgba(102,126,234,0.12)'
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#e2e8f0'
+                e.target.style.boxShadow = 'none'
+              }}
+            >
+              <option value="">-- Pilih tes kecermatan (opsional) --</option>
+              {attentionTests.map(test => (
+                <option key={test.id} value={test.id}>
+                  {test.title} ({test.item_type})
+                </option>
+              ))}
+            </select>
+            <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
+              Jika dipilih, ujian akan menggunakan tes kecermatan. Soal biasa tidak akan ditampilkan.
+            </p>
           </div>
           <div style={{ marginBottom: '24px' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '14px', color: '#1e293b', fontWeight: 500 }}>

@@ -48,7 +48,28 @@ function HasilTryoutContent() {
     setAttempt(attemptData)
     setExam(attemptData.exams)
 
-    // 2. Ambil semua soal untuk ujian ini
+    // Check if this exam has an attention_test_id
+    if (attemptData.exams?.attention_test_id) {
+      // For attention tests, we load answers with question_text fields
+      const { data: answersData, error: aError } = await supabase
+        .from('attempt_answers')
+        .select('*')
+        .eq('attempt_id', attemptId)
+
+      if (aError) {
+        setError('Gagal memuat jawaban.')
+        setLoading(false)
+        return
+      }
+
+      setAnswers(answersData || [])
+      // No standard questions for attention tests
+      setQuestions([])
+      setLoading(false)
+      return
+    }
+
+    // 2. Ambil semua soal untuk ujian biasa
     const { data: questionsData, error: qError } = await supabase
       .from('questions')
       .select(`
@@ -102,11 +123,11 @@ function HasilTryoutContent() {
   }
 
   // Hitung statistik
-  const totalQuestions = questions.length
+  const totalQuestions = exam?.attention_test_id ? answers.length : questions.length
   const correctCount = answers.filter(a => a.is_correct).length
   const wrongCount = answers.filter(a => !a.is_correct).length
   const unanswered = totalQuestions - answers.length
-  const score = Math.round((correctCount / totalQuestions) * 100)
+  const score = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0
 
   // Waktu pengerjaan
   const started = new Date(attempt.started_at)
@@ -174,7 +195,58 @@ function HasilTryoutContent() {
           📝 Review Jawaban
         </h2>
 
-        {questions.length === 0 ? (
+        {/* Untuk attention test, tampilkan jawaban dari question_text */}
+        {exam?.attention_test_id && answers.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {answers.map((ans, index) => {
+              const isCorrect = ans.is_correct
+              return (
+                <div
+                  key={index}
+                  style={{
+                    background: 'white',
+                    borderRadius: '16px',
+                    padding: '20px 24px',
+                    border: '2px solid',
+                    borderColor: isCorrect ? '#22c55e' : '#ef4444',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <span style={{ fontWeight: 700, color: '#1e293b', fontSize: '15px' }}>
+                      Soal {index + 1}
+                    </span>
+                    <span
+                      style={{
+                        padding: '2px 12px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        background: isCorrect ? '#dcfce7' : '#fee2e2',
+                        color: isCorrect ? '#15803d' : '#dc2626',
+                      }}
+                    >
+                      {isCorrect ? '✅ Benar' : '❌ Salah'}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#1e293b', marginBottom: '12px', lineHeight: 1.6 }}>
+                    {ans.question_text}
+                  </div>
+                  <div style={{ display: 'flex', gap: '12px', fontSize: '14px' }}>
+                    <div style={{ padding: '8px 14px', background: '#f1f5f9', borderRadius: '8px' }}>
+                      <span style={{ color: '#64748b' }}>Jawabanmu: </span>
+                      <strong style={{ color: isCorrect ? '#16a34a' : '#dc2626' }}>{ans.selected_option_text}</strong>
+                    </div>
+                    <div style={{ padding: '8px 14px', background: '#f0fdf4', borderRadius: '8px' }}>
+                      <span style={{ color: '#64748b' }}>Jawaban benar: </span>
+                      <strong style={{ color: '#16a34a' }}>{ans.selected_option_text}</strong>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        ) : questions.length === 0 ? (
           <div style={{ background: 'white', borderRadius: '16px', padding: '48px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
             <p style={{ color: '#64748b' }}>Tidak ada soal untuk ujian ini.</p>
           </div>
